@@ -63,7 +63,7 @@ function buildPrompt(day) {
   if (day.review) {
     plan = 'This is a review. Do NOT say the phrases first. Ask the questions below one by one. Give no help unless I say "help".';
   } else if (s === 1) {
-    plan = 'PART 1: Say each target phrase, one at a time, then say "Repeat." and wait. PART 2: Ask the questions below one by one. Never say "Repeat" after a question.';
+    plan = 'PART 1: Give me one target phrase at a time, in exactly this format: "Say after me: <phrase>". Then wait for me to say it. PART 2: Ask the questions below one by one. I answer them; do not ask me to repeat them.';
   } else if (s === 2) {
     plan = 'PART 1: I will say each target phrase. Reply only "OK" or the correct version. PART 2: Ask the questions below one by one.';
   } else {
@@ -77,7 +77,7 @@ function buildPrompt(day) {
     '2. Very simple, common words. Speak slowly.',
     '3. No lists. No explanations. No compliments. No tips.',
     '4. If my sentence is understandable and has no real grammar mistake, do NOT correct it. Go to the next item.',
-    '5. If I make a real mistake: say the correct sentence once, then "Repeat." Fix only one mistake. Do not explain.',
+    '5. If I make a real mistake: say "Say:" and the correct sentence, once. Fix only one mistake. Do not explain.',
     '6. After I repeat once, always go to the next item, even if it is not perfect. Never ask me to repeat twice.',
     '7. If I ask you a question, answer it in 12 words or fewer, then go to the next item.',
     '8. Commands I can say: "again" = repeat your last sentence slower. "shorter" = say it in fewer words. "help" = give me the first 3 words of an answer. "Vietnamese" = say your last sentence in Vietnamese, then say it again in English. All other replies stay in English.',
@@ -94,7 +94,7 @@ function buildPrompt(day) {
     '',
     (review.length ? 'Before END: stop the role if any, and ask one simple question that makes me use an old phrase.\n' : '') + 'END: After the last one, say "Three fixes:" and give my 3 most important corrected sentences. Then stop. If I say "one more", repeat PART 2 with new, similar questions.',
     '',
-    'Now reply with one word only: "Ready." I will switch to voice and say "Start".',
+    'Now reply with one word only: "Ready." I will switch to voice and say "Start". Then begin right away.',
   ].filter((l, i, a) => l !== '' || a[i - 1] !== '').join('\n');
 }
 
@@ -145,7 +145,7 @@ function renderDay(n) {
     <a class="btn full" href="${esc(day.listen.url)}" target="_blank" rel="noopener">Nghe thêm: ${esc(day.listen.label)}</a></section>`;
   h += `<section class="card"><div class="step-h"><h2>${review.length ? '3' : '2'}. Nói với Gemini</h2><span>10 phút</span></div>
     <ol><li>Bấm <b>Sao chép prompt</b>, mở app Gemini, dán vào chat chữ rồi gửi.</li>
-    <li>Gemini đáp “Ready.” thì bấm nút <b>Live</b> ngay trong chat đó.</li><li>Nói <b>“Start”</b>. Cần nghĩ thì bấm <b>Hold</b> để tắt mic.</li></ol>
+    <li>Gemini đáp “Ready.” thì bấm nút <b>Live</b> ngay trong chat đó.</li><li>Nói <b>“Start”</b>. ${stage(n) === 1 && !day.review ? 'Gemini sẽ nói “Say after me: ...”, bạn chỉ cần nhại lại câu đó. ' : ''}Cần nghĩ thì bấm <b>Hold</b> để tắt mic.</li></ol>
     <div class="tip"><b>Trả lời dài quá?</b> Nói ngay “Shorter” hoặc chạm vào màn hình để ngắt. Vẫn dài thì nói: “Remember the rules. Twelve words only.”</div>
     <div class="row"><button class="btn primary" data-copy>Sao chép prompt</button><a class="btn" href="https://gemini.google.com/app" target="_blank" rel="noopener">Mở Gemini</a></div>
     <details style="margin-top:10px"><summary class="muted">Xem prompt & điền thông tin của bạn</summary>

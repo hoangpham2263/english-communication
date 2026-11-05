@@ -2,6 +2,24 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
+<base href="/english-communication/">
+<script>
+// GitHub Pages only has this one page: 404.html sends deep links here as ?p=.
+// Old links used #view; both become a clean path before the app starts.
+function cleanUrl() {
+  const base = "/english-communication/";
+  const params = new URLSearchParams(location.search);
+  const p = params.get("p");
+  if (p !== null) {
+    params.delete("p");
+    const rest = params.toString();
+    history.replaceState(null, "", base + p.replace(/^\/+/, "") + (rest ? "?" + rest : "") + location.hash);
+  }
+  const old = location.hash.match(/^#\/((?:day\/\d+|guide)?)$/);
+  if (old) history.replaceState(null, "", base + old[1] + location.search);
+}
+cleanUrl();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>English 30 ngày</title>
 <meta name="description" content="Lộ trình 30 ngày học nói tiếng Anh cho người mới, luyện với Gemini Live.">
@@ -11,12 +29,12 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <a class="brand" href="#/" title="English 30 ngày" aria-label="Về trang lộ trình"><img src="assets/brand/hp-icon.svg" alt="" width="40" height="40"></a>
+    <a class="brand" href="./" title="English 30 ngày" aria-label="Về trang lộ trình"><img src="assets/brand/hp-icon.svg" alt="" width="40" height="40"></a>
     <div class="top-text"><h1>English 30 ngày</h1></div>
     <nav class="top-actions">
       <a class="ghost back" href="https://hoangpham.is-a.dev/tools" aria-label="Portfolio">←<span> Portfolio</span></a>
-      <a class="ghost" href="#/">Lộ trình</a>
-      <a class="ghost" href="#/guide">Cách học</a>
+      <a class="ghost" href="./">Lộ trình</a>
+      <a class="ghost" href="guide">Cách học</a>
       <a class="ghost gh" href="https://github.com/hoangpham2263/english-communication" target="_blank" rel="noopener">GitHub</a>
     </nav>
   </header>

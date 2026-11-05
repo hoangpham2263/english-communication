@@ -106,7 +106,7 @@ function renderHome() {
   let h = `<section class="card today">
     <p class="muted">${count === DAYS.length ? 'Bạn đã hoàn thành cả 30 ngày!' : 'Học tiếp hôm nay'}</p>
     <h2 class="hero">Ngày ${n}: ${esc(day.t)}</h2><p>${esc(day.goal)}</p>
-    <a class="btn primary full" href="#/day/${n}">Vào bài (khoảng 25 phút)</a></section>
+    <a class="btn primary full" href="day/${n}">Vào bài (khoảng 25 phút)</a></section>
     <section class="card"><div class="step-h"><b>Đã học ${count}/${DAYS.length} ngày</b><span>${last ? 'Lần cuối: ' + last : 'Chưa bắt đầu'}</span></div>
     <div class="bar" role="img" aria-label="Tiến độ ${count} trên ${DAYS.length} ngày"><i style="width:${(count / DAYS.length) * 100}%"></i></div>
     <p class="muted">Lỡ một hôm thì chỉ cần học tiếp ngày kế tiếp, không cần học bù.</p></section>`;
@@ -116,7 +116,7 @@ function renderHome() {
       const d = dayOf(i); const done = isDone(i);
       h += `<div class="day ${done ? 'done' : ''} ${d.review ? 'rev' : ''} ${i === n && !done ? 'now' : ''}">
         <label aria-label="Đánh dấu xong ngày ${i}"><input type="checkbox" data-tick="${i}" ${done ? 'checked' : ''}></label>
-        <a href="#/day/${i}"><b>Ngày ${i}: ${esc(d.t)}</b><small>${done ? 'Xong ' + state.done[i] : d.review ? 'Ngày ôn tập' : esc(d.goal)}</small></a></div>`;
+        <a href="day/${i}"><b>Ngày ${i}: ${esc(d.t)}</b><small>${done ? 'Xong ' + state.done[i] : d.review ? 'Ngày ôn tập' : esc(d.goal)}</small></a></div>`;
     }
     h += '</section>';
   });
@@ -128,9 +128,9 @@ function renderHome() {
 
 function renderDay(n) {
   const day = dayOf(n);
-  if (!day) { location.hash = '#/'; return; }
+  if (!day) { go(''); return; }
   const review = spacedReview(n); const chunks = targetChunks(day); const done = isDone(n); const me = state.me;
-  let h = `<div><p class="muted" style="margin-bottom:4px"><a href="#/">Lộ trình</a> · Ngày ${n}/30${day.review ? ' · Ôn tập' : ''}</p>
+  let h = `<div><p class="muted" style="margin-bottom:4px"><a href="./">Lộ trình</a> · Ngày ${n}/30${day.review ? ' · Ôn tập' : ''}</p>
     <h2 class="hero">${esc(day.t)}</h2><p style="margin:0"><b>Mục tiêu:</b> ${esc(day.goal)}</p></div>`;
   if (review.length) {
     h += `<section class="card"><div class="step-h"><h2>1. Nhớ lại</h2><span>3 phút</span></div>
@@ -157,7 +157,7 @@ function renderDay(n) {
   h += `<section class="card"><div class="step-h"><h2>${review.length ? '4' : '3'}. Tự kiểm tra</h2><span>5 phút</span></div>
     <p>${esc(day.self)}</p><p class="muted">Sau đó bấm End trong Gemini và đọc lại transcript, chép 3 câu Gemini đã sửa vào sổ.</p>
     <button class="btn full ${done ? '' : 'primary'}" data-finish="${n}">${done ? 'Đã xong ✓ (bấm để bỏ tick)' : 'Xong ngày này ✓'}</button></section>
-    <div class="row">${n > 1 ? `<a class="btn" href="#/day/${n - 1}">← Ngày ${n - 1}</a>` : ''}${n < DAYS.length ? `<a class="btn" href="#/day/${n + 1}">Ngày ${n + 1} →</a>` : ''}</div>`;
+    <div class="row">${n > 1 ? `<a class="btn" href="day/${n - 1}">← Ngày ${n - 1}</a>` : ''}${n < DAYS.length ? `<a class="btn" href="day/${n + 1}">Ngày ${n + 1} →</a>` : ''}</div>`;
   app.innerHTML = h;
 }
 
@@ -192,10 +192,15 @@ function renderGuide() {
     <li><a href="https://www.coe.int/en/web/common-european-framework-reference-languages/table-1-cefr-3.3-common-reference-levels-global-scale" target="_blank" rel="noopener">CEFR: Các cấp độ</a>, bài nghe từ <a href="https://learnenglish.britishcouncil.org/skills/speaking/a1-speaking" target="_blank" rel="noopener">British Council</a> và <a href="https://learningenglish.voanews.com/p/5644.html" target="_blank" rel="noopener">VOA</a></li></ul></section>`;
 }
 
+const BASE = '/english-communication/';
+const urlPath = () => location.pathname.slice(BASE.length).replace(/\/$/, '');
+const dayInUrl = () => { const m = urlPath().match(/^day\/(\d+)$/); return m ? Number(m[1]) : NaN; };
+function go(path) { history.pushState(null, '', BASE + path); route(); }
+
 function route() {
   if ('speechSynthesis' in window) speechSynthesis.cancel();
-  const hash = location.hash;
-  const sync = hash.match(/^#\/sync\/(.+)$/);
+  // The progress link stays after the # so it is never sent to a server. #/sync/ is the old form.
+  const sync = location.hash.match(/^#(?:sync=|\/sync\/)(.+)$/);
   if (sync) {
     try {
       const incoming = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(sync[1])))));
@@ -208,10 +213,10 @@ function route() {
         save(); toast('Đã chép tiến độ.');
       }
     } catch { toast('Link tiến độ không hợp lệ.'); }
-    location.hash = '#/'; return;
+    go(''); return;
   }
-  const m = hash.match(/^#\/day\/(\d+)$/);
-  if (m) renderDay(Number(m[1])); else if (hash === '#/guide') renderGuide(); else renderHome();
+  const day = dayInUrl();
+  if (day) renderDay(day); else if (urlPath() === 'guide') renderGuide(); else renderHome();
   window.scrollTo(0, 0);
 }
 
@@ -233,16 +238,16 @@ document.addEventListener('click', async (e) => {
     const span = t.querySelector('.en'); span.textContent = t.dataset.reveal; span.classList.remove('hide'); speak(t.dataset.reveal);
   }
   if ('copy' in t.dataset) {
-    const n = Number(location.hash.split('/')[2]);
+    const n = dayInUrl();
     toast((await copyText(buildPrompt(dayOf(n)))) ? 'Đã sao chép. Dán vào Gemini nhé!' : 'Chưa sao chép được. Hãy mở phần “Xem prompt” và copy tay.');
   }
   if (t.dataset.finish) {
     const n = Number(t.dataset.finish); const on = !isDone(n); setDone(n, on);
-    if (on) { toast(n === DAYS.length ? 'Bạn đã xong 30 ngày!' : 'Tuyệt! Đã tick xong.'); location.hash = '#/'; } else renderDay(n);
+    if (on) { toast(n === DAYS.length ? 'Bạn đã xong 30 ngày!' : 'Tuyệt! Đã tick xong.'); go(''); } else renderDay(n);
   }
   if ('share' in t.dataset) {
     const code = btoa(unescape(encodeURIComponent(JSON.stringify({ done: state.done, me: state.me }))));
-    const url = `${location.origin}${location.pathname}#/sync/${encodeURIComponent(code)}`;
+    const url = `${location.origin}${BASE}#sync=${encodeURIComponent(code)}`;
     toast((await copyText(url)) ? 'Đã sao chép link. Gửi sang điện thoại rồi mở.' : url);
   }
 });
@@ -256,9 +261,18 @@ document.addEventListener('input', (e) => {
   const f = e.target.dataset && e.target.dataset.me;
   if (!f) return;
   state.me[f] = e.target.value.slice(0, 60); save();
-  const n = Number(location.hash.split('/')[2]); const p = document.getElementById('prompt');
+  const n = dayInUrl(); const p = document.getElementById('prompt');
   if (p && dayOf(n)) p.textContent = buildPrompt(dayOf(n));
 });
 
-window.addEventListener('hashchange', route);
+// Links inside the app change the page without a reload.
+document.addEventListener('click', (e) => {
+  const a = e.target.closest && e.target.closest('a[href]');
+  if (!a || a.target || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  if (a.origin !== location.origin || !a.pathname.startsWith(BASE) || a.hasAttribute('download')) return;
+  e.preventDefault();
+  go(a.pathname.slice(BASE.length));
+});
+window.addEventListener('popstate', route);
+window.addEventListener('hashchange', () => { cleanUrl(); route(); });
 route();

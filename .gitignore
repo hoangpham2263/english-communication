@@ -3,6 +3,7 @@
 !/.gitignore
 !/.nojekyll
 !/index.html
+!/404.html
 !/README.md
 !/assets/
 .DS_Store

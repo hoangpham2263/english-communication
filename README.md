@@ -2,7 +2,7 @@
 
 Lộ trình 30 ngày học nói tiếng Anh cho người mới bắt đầu, mỗi ngày khoảng 25 phút và luyện nói với Gemini Live trên điện thoại.
 
-**Mở trang học:** https://hoangpham2263.github.io/English/
+**Mở trang học:** https://hoangpham.is-a.dev/English/
 
 ## Mỗi ngày có gì
 

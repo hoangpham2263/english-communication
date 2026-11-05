@@ -105,7 +105,7 @@ function renderHome() {
   const last = dates[dates.length - 1];
   let h = `<section class="card today">
     <p class="muted">${count === DAYS.length ? 'Bạn đã hoàn thành cả 30 ngày!' : 'Học tiếp hôm nay'}</p>
-    <h1>Ngày ${n}: ${esc(day.t)}</h1><p>${esc(day.goal)}</p>
+    <h2 class="hero">Ngày ${n}: ${esc(day.t)}</h2><p>${esc(day.goal)}</p>
     <a class="btn primary full" href="#/day/${n}">Vào bài (khoảng 25 phút)</a></section>
     <section class="card"><div class="step-h"><b>Đã học ${count}/${DAYS.length} ngày</b><span>${last ? 'Lần cuối: ' + last : 'Chưa bắt đầu'}</span></div>
     <div class="bar" role="img" aria-label="Tiến độ ${count} trên ${DAYS.length} ngày"><i style="width:${(count / DAYS.length) * 100}%"></i></div>
@@ -120,7 +120,7 @@ function renderHome() {
     }
     h += '</section>';
   });
-  h += `<section class="card" style="margin-top:20px"><h2>Chuyển tiến độ sang máy khác</h2>
+  h += `<section class="card" style="margin-top:12px"><h2>Chuyển tiến độ sang máy khác</h2>
     <p class="muted">Dấu tick được lưu riêng trên từng trình duyệt. Bấm nút rồi mở link đó trên điện thoại để chép tiến độ sang.</p>
     <button class="btn full" data-share>Sao chép link tiến độ</button></section>`;
   app.innerHTML = h;
@@ -130,16 +130,16 @@ function renderDay(n) {
   const day = dayOf(n);
   if (!day) { location.hash = '#/'; return; }
   const review = spacedReview(n); const chunks = targetChunks(day); const done = isDone(n); const me = state.me;
-  let h = `<p class="muted"><a href="#/">Lộ trình</a> · Ngày ${n}/30${day.review ? ' · Ôn tập' : ''}</p>
-    <h1>${esc(day.t)}</h1><p><b>Mục tiêu:</b> ${esc(day.goal)}</p>`;
+  let h = `<div><p class="muted" style="margin-bottom:4px"><a href="#/">Lộ trình</a> · Ngày ${n}/30${day.review ? ' · Ôn tập' : ''}</p>
+    <h2 class="hero">${esc(day.t)}</h2><p style="margin:0"><b>Mục tiêu:</b> ${esc(day.goal)}</p></div>`;
   if (review.length) {
     h += `<section class="card"><div class="step-h"><h2>1. Nhớ lại</h2><span>3 phút</span></div>
       <p class="muted">Nhìn tiếng Việt, tự nói tiếng Anh thành tiếng, rồi mới chạm để xem đáp án.</p>
-      ${review.map((c) => `<button class="recall" data-reveal="${esc(c[0])}">${esc(c[1])}<span class="en hide">Chạm để xem</span></button>`).join('')}</section>`;
+      <div class="cols">${review.map((c) => `<button class="recall" data-reveal="${esc(c[0])}">${esc(c[1])}<span class="en hide">Chạm để xem</span></button>`).join('')}</div></section>`;
   }
   h += `<section class="card"><div class="step-h"><h2>${review.length ? '2' : '1'}. Nghe & nhại</h2><span>7 phút</span></div>
     <p class="muted">Bấm loa, nhại theo 3 lần, đúng nhịp đúng giọng. Đừng cố học từng từ, cứ học nguyên câu.</p>
-    ${chunks.map((c) => `<div class="chunk"><button class="say" data-say="${esc(c[0])}" aria-label="Nghe: ${esc(c[0])}">▶</button><div><b>${esc(c[0])}</b><span>${esc(c[1])}</span></div></div>`).join('')}
+    <div class="cols">${chunks.map((c) => `<div class="chunk"><button class="say" data-say="${esc(c[0])}" aria-label="Nghe: ${esc(c[0])}">▶</button><div><b>${esc(c[0])}</b><span>${esc(c[1])}</span></div></div>`).join('')}</div>
     ${day.pattern ? `<div class="tip"><b>Mẫu câu:</b> ${esc(day.pattern)}</div>` : ''}
     <div class="tip"><b>Phát âm:</b> ${esc(day.sound)}</div>
     <a class="btn full" href="${esc(day.listen.url)}" target="_blank" rel="noopener">Nghe thêm: ${esc(day.listen.label)}</a></section>`;
@@ -150,9 +150,9 @@ function renderDay(n) {
     <div class="row"><button class="btn primary" data-copy>Sao chép prompt</button><a class="btn" href="https://gemini.google.com/app" target="_blank" rel="noopener">Mở Gemini</a></div>
     <details style="margin-top:10px"><summary class="muted">Xem prompt & điền thông tin của bạn</summary>
       <p class="muted" style="margin-top:8px">Điền một lần, mọi prompt sẽ tự có thông tin này.</p>
-      <input type="text" data-me="name" placeholder="Tên của bạn" aria-label="Tên" value="${esc(me.name)}">
+      <div class="fields"><input type="text" data-me="name" placeholder="Tên của bạn" aria-label="Tên" value="${esc(me.name)}">
       <input type="text" data-me="job" placeholder="Nghề (tiếng Anh, ví dụ: developer)" aria-label="Nghề" value="${esc(me.job)}">
-      <input type="text" data-me="city" placeholder="Thành phố" aria-label="Thành phố" value="${esc(me.city)}">
+      <input type="text" data-me="city" placeholder="Thành phố" aria-label="Thành phố" value="${esc(me.city)}"></div>
       <pre id="prompt">${esc(buildPrompt(day))}</pre></details></section>`;
   h += `<section class="card"><div class="step-h"><h2>${review.length ? '4' : '3'}. Tự kiểm tra</h2><span>5 phút</span></div>
     <p>${esc(day.self)}</p><p class="muted">Sau đó bấm End trong Gemini và đọc lại transcript, chép 3 câu Gemini đã sửa vào sổ.</p>
@@ -162,7 +162,7 @@ function renderDay(n) {
 }
 
 function renderGuide() {
-  app.innerHTML = `<h1>Cách học để thật sự nói được</h1>
+  app.innerHTML = `<h2 class="hero">Cách học để thật sự nói được</h2>
   <section class="card"><h2>Một buổi 25 phút</h2><ol>
     <li><b>Nhớ lại (3'):</b> tự nói lại câu cũ trước khi xem đáp án. Cố nhớ giúp nhớ lâu hơn đọc lại.</li>
     <li><b>Nghe & nhại (7'):</b> học cả cụm câu thay vì từ rời, để khi nói không phải ghép từng từ.</li>

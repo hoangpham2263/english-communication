@@ -1,0 +1,8 @@
+# Thư mục này còn chứa sách, audio và ảnh riêng: chặn tất cả, chỉ cho phép file của trang web.
+/*
+!/.gitignore
+!/.nojekyll
+!/index.html
+!/README.md
+!/assets/
+.DS_Store
